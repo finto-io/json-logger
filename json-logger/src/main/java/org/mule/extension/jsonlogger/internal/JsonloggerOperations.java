@@ -411,10 +411,7 @@ public class JsonloggerOperations {
         - TimeZone: Defaults to UTC. Refer to https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for valid timezones
     */
         DateTime dateTime = new DateTime(loggerTimestamp).withZone(org.joda.time.DateTimeZone.forID(System.getProperty("json.logger.timezone", "UTC")));
-        String timestamp = dateTime.toString();
-        if (System.getProperty("json.logger.dateformat") != null && !System.getProperty("json.logger.dateformat").equals("")) {
-            timestamp = dateTime.toString(System.getProperty("json.logger.dateformat"));
-        }
+        String timestamp = dateTime.toString("yyyy-MM-dd HH:mm:ss.SSS");
         return timestamp;
     }
 
@@ -426,6 +423,7 @@ public class JsonloggerOperations {
         } catch (Exception e) {
             LOGGER.error("Error parsing log data as a string", e);
         }
+
         doLog(priority.toString(), logLine);
 
         return logLine;

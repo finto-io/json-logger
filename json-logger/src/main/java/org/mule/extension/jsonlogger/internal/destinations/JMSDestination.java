@@ -1,6 +1,5 @@
 package org.mule.extension.jsonlogger.internal.destinations;
 
-import org.mule.extension.jsonlogger.api.pojos.Priority;
 import org.mule.extensions.jms.api.message.JmsMessageBuilder;
 import org.mule.extensions.jms.api.message.JmsxProperties;
 import org.mule.runtime.api.metadata.TypedValue;
@@ -19,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.mule.runtime.api.metadata.DataType.JSON_STRING;
 

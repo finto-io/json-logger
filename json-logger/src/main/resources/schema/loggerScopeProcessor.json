@@ -7,6 +7,7 @@
       "type": "string",
       "javaType": "org.mule.extension.jsonlogger.api.pojos.ScopeTracePoint",
       "enum": [
+        "DATABASE_REQUEST_SCOPE",
         "DATA_TRANSFORM_SCOPE",
         "OUTBOUND_REQUEST_SCOPE",
         "FLOW_LOGIC_SCOPE"

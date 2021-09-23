@@ -11,7 +11,6 @@ import org.mule.extension.jsonlogger.api.pojos.Priority;
 import org.mule.extension.jsonlogger.api.pojos.ScopeTracePoint;
 import org.mule.extension.jsonlogger.internal.datamask.JsonMasker;
 import org.mule.extension.jsonlogger.internal.singleton.ConfigsSingleton;
-import org.mule.extension.jsonlogger.internal.singleton.LogEventSingleton;
 import org.mule.extension.jsonlogger.internal.singleton.ObjectMapperSingleton;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.meta.model.operation.ExecutionType;
@@ -60,10 +59,6 @@ public class JsonloggerOperations {
     // JSON Object Mapper
     @Inject
     ObjectMapperSingleton om;
-
-    // Log Event for External Destination
-    @Inject
-    LogEventSingleton logEvent;
 
     // Global definition of logger configs so that it's available for scope processor (SDK scope doesn't support passing configurations)
     @Inject
@@ -158,12 +153,12 @@ public class JsonloggerOperations {
                                                 List<String> dataMaskingFields = (config.getJsonOutput().getContentFieldsDataMasking() != null) ? Arrays.asList(config.getJsonOutput().getContentFieldsDataMasking().split(",")) : new ArrayList<>();
                                                 LOGGER.debug("The following JSON keys/paths will be masked for logging: " + dataMaskingFields);
                                                 if (!dataMaskingFields.isEmpty()) {
-                                                    JsonNode tempContentNode = om.getObjectMapper().readTree((InputStream)typedVal.getValue());
+                                                    JsonNode tempContentNode = om.getObjectMapper().readTree((InputStream) typedVal.getValue());
                                                     JsonMasker masker = new JsonMasker(dataMaskingFields, true);
                                                     JsonNode masked = masker.mask(tempContentNode);
                                                     typedValuesAsJsonNode.put(k, masked);
                                                 } else {
-                                                    typedValuesAsJsonNode.put(k, om.getObjectMapper().readTree((InputStream)typedVal.getValue()));
+                                                    typedValuesAsJsonNode.put(k, om.getObjectMapper().readTree((InputStream) typedVal.getValue()));
                                                 }
                                             } else {
                                                 typedValuesAsString.put(k, (String) transformationService.transform(typedVal.getValue(), typedVal.getDataType(), TEXT_STRING));
@@ -220,15 +215,6 @@ public class JsonloggerOperations {
             /** Print Logger **/
             String finalLog = printObjectToLog(mergedLogger, loggerProcessor.getPriority().toString(), config.getJsonOutput().isPrettyPrint());
 
-            /** Forward Log to External Destination **/
-            if (config.getExternalDestination() != null) {
-                LOGGER.debug("config.getExternalDestination().getSupportedCategories().isEmpty(): " + config.getExternalDestination().getSupportedCategories().isEmpty());
-                LOGGER.debug("config.getExternalDestination().getSupportedCategories().contains(jsonLogger.getName()): " + config.getExternalDestination().getSupportedCategories().contains(jsonLogger.getName()));
-                if (configs.getConfig(config.getConfigName()).getExternalDestination().getSupportedCategories().isEmpty() || config.getExternalDestination().getSupportedCategories().contains(jsonLogger.getName())) {
-                    LOGGER.debug(jsonLogger.getName() + " is a supported category for external destination");
-                    logEvent.publishToExternalDestination(correlationInfo.getEventId(), finalLog, config.getConfigName());
-                }
-            }
         } else {
             LOGGER.debug("Avoiding logger operation logic execution due to log priority not being enabled");
         }
@@ -240,10 +226,10 @@ public class JsonloggerOperations {
      */
     @Execution(ExecutionType.BLOCKING)
     public void loggerScope(@DisplayName("Module configuration") @Example("JSON_Logger_Config") @Summary("Indicate which Global config should be associated with this Scope.") String configurationRef,
-                            @Optional(defaultValue="INFO") Priority priority,
-                            @Optional(defaultValue="OUTBOUND_REQUEST_SCOPE") ScopeTracePoint scopeTracePoint,
+                            @Optional(defaultValue = "INFO") Priority priority,
+                            @Optional(defaultValue = "OUTBOUND_REQUEST_SCOPE") ScopeTracePoint scopeTracePoint,
                             @Optional @Summary("If not set, by default will log to the org.mule.extension.jsonlogger.JsonLogger category") String category,
-                            @Optional(defaultValue="#[correlationId]") @Placement(tab = "Advanced") String correlationId,
+                            @Optional(defaultValue = "#[correlationId]") @Placement(tab = "Advanced") String correlationId,
                             ComponentLocation location,
                             CorrelationInfo correlationInfo,
                             FlowListener flowListener,
@@ -255,7 +241,7 @@ public class JsonloggerOperations {
          * ===================
          **/
 
-        Long initialTimestamp,loggerTimestamp;
+        Long initialTimestamp, loggerTimestamp;
         initialTimestamp = loggerTimestamp = System.currentTimeMillis();
 
         initLoggerCategory(category);
@@ -336,11 +322,6 @@ public class JsonloggerOperations {
                         // Print Logger
                         String finalLogAfter = printObjectToLog(loggerProcessor, priority.toString(), configs.getConfig(configurationRef).getJsonOutput().isPrettyPrint());
 
-                        /** Forward Log to External Destination **/
-                        if (configs.getConfig(configurationRef).getExternalDestination() != null) {
-                            publishScopeLogEvents(configurationRef, correlationId, finalLogBefore, finalLogAfter);
-                        }
-
                         callback.success(result);
                     },
                     (error, previous) -> {
@@ -363,11 +344,6 @@ public class JsonloggerOperations {
                         // Print Logger
                         String finalLogError = printObjectToLog(loggerProcessor, "ERROR", configs.getConfig(configurationRef).getJsonOutput().isPrettyPrint());
 
-                        /** Forward Log to External Destination **/
-                        if (configs.getConfig(configurationRef).getExternalDestination() != null) {
-                            publishScopeLogEvents(configurationRef, correlationId, finalLogBefore, finalLogError);
-                        }
-
                         callback.error(error);
                     });
         } else {
@@ -380,17 +356,6 @@ public class JsonloggerOperations {
                     (error, previous) -> {
                         callback.error(error);
                     });
-        }
-    }
-
-    private void publishScopeLogEvents(String configurationRef, String correlationId, String finalLogBefore, String finalLogAfter) {
-        LOGGER.debug("externalDestination.getDestination().getSupportedCategories().isEmpty(): " + configs.getConfig(configurationRef).getExternalDestination().getSupportedCategories().isEmpty());
-        LOGGER.debug("externalDestination.getDestination().getSupportedCategories().contains(jsonLogger.getName()): " + configs.getConfig(configurationRef).getExternalDestination().getSupportedCategories().contains(jsonLogger.getName()));
-        if (configs.getConfig(configurationRef).getExternalDestination().getSupportedCategories().isEmpty() || configs.getConfig(configurationRef).getExternalDestination().getSupportedCategories().contains(jsonLogger.getName())) {
-            LOGGER.debug(jsonLogger.getName() + " is a supported category for external destination");
-            // Publishing before and after logEvents for better efficiency
-            logEvent.publishToExternalDestination(correlationId, finalLogBefore, configurationRef);
-            logEvent.publishToExternalDestination(correlationId, finalLogAfter, configurationRef);
         }
     }
 

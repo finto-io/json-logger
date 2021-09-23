@@ -6,13 +6,15 @@
 http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 
-    <json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="d3c3b8c7-8417-4545-9e60-9c914261d272"/>
+    <json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config"
+                        doc:id="d3c3b8c7-8417-4545-9e60-9c914261d272"/>
     <configuration-properties file="json-logger.properties"/>
 
-    <flow name="test-logger" doc:id="457201a2-e5c5-4ac6-ab29-ab63bc517a7b" >
-        <json-logger:logger doc:name="Logger" doc:id="8909da6b-5806-4001-a9d4-6593ee473743" message="another dummy" config-ref="JSON_Logger_Config" tracePoint="FLOW">
+    <flow name="test-logger" doc:id="457201a2-e5c5-4ac6-ab29-ab63bc517a7b">
+        <json-logger:logger doc:name="Logger" doc:id="8909da6b-5806-4001-a9d4-6593ee473743" message="another dummy"
+                            config-ref="JSON_Logger_Config" tracePoint="FLOW">
         </json-logger:logger>
-        <set-payload value="all good" doc:name="Set Payload" doc:id="89ac164e-c37f-4b11-ad47-e30f4be9f09a" />
+        <set-payload value="all good" doc:name="Set Payload" doc:id="89ac164e-c37f-4b11-ad47-e30f4be9f09a"/>
     </flow>
 
 </mule>

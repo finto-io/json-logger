@@ -8,10 +8,13 @@ fun stringifyAny(inputData: Any) = if (inputData.^mimeType == "application/xml" 
 								   else
 						   	write(inputData,inputData.^mimeType)
 						   	
-fun stringifyNonJSON(inputData: Any) = if (inputData.^mimeType == "application/xml" or inputData.^mimeType == "application/dw")
-                                                write(inputData,inputData.^mimeType,{indent:false})
-                                            else
-                                                inputData default {}
+fun stringifyNonJSON(inputData: Any) = if (inputData.^mimeType == "application/xml" or
+										   inputData.^mimeType == "application/dw") 
+										 write(inputData,inputData.^mimeType,{indent:false}) 
+									   else if (inputData.^mimeType == "application/json" or inputData.^mimeType == "*/*")
+									   	 inputData
+									   else
+							   			 write(inputData,inputData.^mimeType)
 
 fun stringifyAnyWithMetadata(inputData: Any) = { 
 												 data: if (inputData.^mimeType == "application/xml" or

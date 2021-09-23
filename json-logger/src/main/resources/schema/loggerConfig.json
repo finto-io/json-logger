@@ -9,14 +9,14 @@
         "applicationName": {
           "type": "string",
           "sdk": {
-            "default": "${json.logger.application.name}",
+            "default": "${application.name}",
             "summary": "Name of the Mule application. Recommendation: This value should be based on pom.xml"
           }
         },
         "applicationVersion": {
           "type": "string",
           "sdk": {
-            "default": "${json.logger.application.version}",
+            "default": "${application.version}",
             "summary": "Version of the Mule application. Recommendation: This value should be based on pom.xml"
           }
         },
@@ -26,6 +26,74 @@
             "required": true,
             "example": "${mule.env}",
             "summary": "Name of the Mule Environment where the application is running. Recommendation: This value should be based on external property"
+          }
+        },
+        "xForwardedFor": {
+          "type": "string",
+          "sdk": {
+            "default": "#[attributes.headers.'x-forwarded-for' default null]",
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
+          }
+        },
+        "remoteAddress": {
+          "type": "string",
+          "sdk": {
+            "default": "#[attributes.remoteAddress default null]",
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
+          }
+        },
+        "userCommonName": {
+          "type": "string",
+          "sdk": {
+            "default": "#[vars.commonName]",
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
+          }
+        },
+        "userEmail": {
+          "type": "string",
+          "sdk": {
+            "default": "#[vars.email]",
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
+          }
+        },
+        "userClientId": {
+          "type": "string",
+          "sdk": {
+            "default": "#[vars.clientId]",
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
+          }
+        },
+        "httpMethod": {
+          "type": "string",
+          "sdk": {
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
+          }
+        },
+        "requestUri": {
+          "type": "string",
+          "sdk": {
+            "required": false,
+            "placement": {
+              "tab": "Advanced"
+            }
           }
         }
       },
